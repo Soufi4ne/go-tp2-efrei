@@ -232,8 +232,10 @@ Si le chemin de sortie inclut des répertoires inexistants, ils sont créés aut
 
 ## 👥 Équipe de développement
 
-- **Soufiane** - Développeur principal
-- **Axelle Lanca** - Contributeur original du repository
+- **Soufiane** - Développeur 
+- **Mehdi** - Développeur
+- **Aymene** - Développeur
+- **Axelle** - Contributeur original du repository
 
 ## 📝 Licence
 
