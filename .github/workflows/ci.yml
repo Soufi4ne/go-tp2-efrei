@@ -55,6 +55,7 @@ jobs:
       uses: securego/gosec@master
       with:
         args: ./...
+        go-version: '1.24.3'
 
   build:
     name: Build
