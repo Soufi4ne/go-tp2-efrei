@@ -7,6 +7,13 @@
     "error_details": "fichier introuvable ou inaccessible: /non/existent/log.log"
   },
   {
+    "log_id": "corrupted-log",
+    "file_path": "test_logs/corrupted.log",
+    "status": "OK",
+    "message": "Analyse terminée avec succès.",
+    "error_details": ""
+  },
+  {
     "log_id": "db-server-3",
     "file_path": "test_logs/mysql_error.log",
     "status": "OK",
@@ -33,12 +40,5 @@
     "status": "OK",
     "message": "Analyse terminée avec succès.",
     "error_details": ""
-  },
-  {
-    "log_id": "corrupted-log",
-    "file_path": "test_logs/corrupted.log",
-    "status": "FAILED",
-    "message": "Erreur de parsing.",
-    "error_details": "erreur de parsing pour le log corrupted-log: données corrompues détectées"
   }
 ]
