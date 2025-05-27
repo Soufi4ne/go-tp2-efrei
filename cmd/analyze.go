@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"math/rand"
 	"path/filepath"
 	"strings"
 	"time"
@@ -55,8 +54,6 @@ func init() {
 }
 
 func runAnalyze(cmd *cobra.Command, args []string) error {
-	rand.Seed(time.Now().UnixNano())
-
 	fmt.Printf("🔍 Démarrage de l'analyse des logs...\n")
 	fmt.Printf("📁 Fichier de configuration: %s\n", configPath)
 
@@ -114,4 +111,4 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("\n✨ Analyse terminée avec succès!")
 	return nil
-} 
+}
