@@ -1,151 +1,258 @@
-# TP : GoLog Analyzer - Analyse de Logs Distribuée
+# 🔍 LogAnalyzer - Outil d'Analyse de Logs Distribuée
 
-### Contexte
+[![Go Version](https://img.shields.io/badge/Go-1.24+-blue.svg)](https://golang.org)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Votre équipe est chargée de développer un outil en ligne de commande (CLI) en Go, nommé `loganalyzer`. Son but est d'aider les administrateurs système à analyser des fichiers de logs (journaux) provenant de diverses sources (serveurs, applications). L'objectif est de pouvoir centraliser l'analyse de multiples logs en parallèle et d'en extraire des informations clés, tout en gérant les erreurs potentielles de manière robuste.
+LogAnalyzer est un outil en ligne de commande (CLI) développé en Go pour analyser des fichiers de logs de manière distribuée et concurrente. Il permet aux administrateurs système d'analyser plusieurs logs en parallèle et d'extraire des informations clés tout en gérant les erreurs de manière robuste.
 
-### Objectifs d'apprentissage
+## 🚀 Fonctionnalités
 
-Ce TP vous permettra de renforcer vos compétences sur les concepts suivants :
+- ✅ **Analyse concurrente** : Traitement de plusieurs logs en parallèle avec des goroutines
+- ✅ **Gestion d'erreurs robuste** : Erreurs personnalisées avec `errors.Is()` et `errors.As()`
+- ✅ **Interface CLI intuitive** : Commandes et drapeaux avec Cobra
+- ✅ **Export JSON** : Sauvegarde des résultats au format JSON
+- ✅ **Statistiques détaillées** : Résumé des succès et échecs
+- ✅ **Architecture modulaire** : Code organisé en packages logiques
 
-- **Concurrence :** Utiliser les **goroutines** et les **WaitGroups** pour traiter plusieurs tâches en parallèle.
-- **Gestion des Erreurs :** Implémenter des **erreurs personnalisées** et les gérer proprement avec `errors.Is` et `errors.As`.
-- **Outil CLI avec Cobra :** Structurer une application en ligne de commande avec des **sous-commandes** et des **drapeaux (flags)**.
-- **Import/Export JSON :** Manipuler des données au format JSON pour la configuration d'entrée et le rapport de sortie.
-- **Modularité :** Organiser le code en **packages** logiques (`internal/`).
+## 📋 Prérequis
+
+- Go 1.24 ou supérieur
+- Système d'exploitation : Windows, macOS, Linux
+
+## 🛠️ Installation
+
+### Cloner le projet
+
+```bash
+git clone https://github.com/axellelanca/loganizer.git
+cd loganizer
+```
+
+### Installer les dépendances
+
+```bash
+go mod tidy
+```
+
+### Compiler l'application
+
+```bash
+# Linux/macOS
+go build -o loganalyzer .
+
+# Windows
+go build -o loganalyzer.exe .
+```
+
+## 📖 Utilisation
+
+### Commande principale
+
+```bash
+loganalyzer --help
+```
+
+### Commande analyze
+
+La commande `analyze` est le cœur de l'application. Elle lit un fichier de configuration JSON et analyse les logs spécifiés de manière concurrente.
+
+#### Syntaxe
+
+```bash
+loganalyzer analyze --config <chemin_config> [--output <chemin_sortie>]
+```
+
+#### Options
+
+- `-c, --config` : Chemin vers le fichier de configuration JSON (requis)
+- `-o, --output` : Chemin vers le fichier de sortie JSON (optionnel)
+- `-h, --help` : Afficher l'aide
+
+#### Exemples
+
+```bash
+# Analyse avec affichage console uniquement
+loganalyzer analyze --config config.json
+
+# Analyse avec export JSON
+loganalyzer analyze --config config.json --output report.json
+
+# Utilisation des raccourcis
+loganalyzer analyze -c config.json -o report.json
+```
+
+## 📁 Format du fichier de configuration
+
+Le fichier de configuration doit être au format JSON et contenir un tableau d'objets représentant les logs à analyser :
+
+```json
+[
+  {
+    "id": "web-server-1",
+    "path": "test_logs/access.log",
+    "type": "nginx-access"
+  },
+  {
+    "id": "app-backend-2",
+    "path": "test_logs/errors.log",
+    "type": "custom-app"
+  },
+  {
+    "id": "db-server-3",
+    "path": "test_logs/mysql_error.log",
+    "type": "mysql-error"
+  }
+]
+```
+
+### Champs requis
+
+- `id` : Identifiant unique du log
+- `path` : Chemin vers le fichier de log (absolu ou relatif)
+- `type` : Type de log (pour classification)
+
+## 📊 Format du rapport de sortie
+
+Le rapport JSON généré contient les résultats de l'analyse :
+
+```json
+[
+  {
+    "log_id": "web-server-1",
+    "file_path": "test_logs/access.log",
+    "status": "OK",
+    "message": "Analyse terminée avec succès.",
+    "error_details": ""
+  },
+  {
+    "log_id": "invalid-path",
+    "file_path": "/non/existent/log.log",
+    "status": "FAILED",
+    "message": "Fichier introuvable.",
+    "error_details": "fichier introuvable ou inaccessible: /non/existent/log.log"
+  }
+]
+```
+
+### Champs du rapport
+
+- `log_id` : Identifiant du log analysé
+- `file_path` : Chemin du fichier analysé
+- `status` : Statut de l'analyse (`OK` ou `FAILED`)
+- `message` : Message descriptif du résultat
+- `error_details` : Détails de l'erreur (si applicable)
+
+## 🏗️ Architecture du projet
+
+```
+loganizer/
+├── cmd/                    # Commandes CLI
+│   ├── root.go            # Commande racine
+│   └── analyze.go         # Commande analyze
+├── internal/              # Packages internes
+│   ├── config/           # Gestion des configurations
+│   │   └── config.go
+│   ├── analyzer/         # Logique d'analyse
+│   │   ├── analyzer.go
+│   │   └── errors.go
+│   └── reporter/         # Export des résultats
+│       └── reporter.go
+├── test_logs/            # Fichiers de test
+├── config.json           # Configuration d'exemple
+├── main.go              # Point d'entrée
+├── go.mod               # Module Go
+└── README.md            # Documentation
+```
+
+### Packages
+
+#### `internal/config`
+Gère la lecture et la validation des fichiers de configuration JSON.
+
+#### `internal/analyzer`
+Contient la logique d'analyse des logs, les erreurs personnalisées et l'affichage des résultats.
+
+#### `internal/reporter`
+Gère l'export des résultats au format JSON avec création automatique des répertoires.
+
+#### `cmd`
+Contient les commandes CLI utilisant le framework Cobra.
+
+## 🔧 Concepts techniques implémentés
+
+### Concurrence
+- **Goroutines** : Chaque log est analysé dans une goroutine séparée
+- **WaitGroups** : Synchronisation des goroutines
+- **Channels** : Communication sécurisée entre goroutines
+
+### Gestion d'erreurs
+- **Erreurs personnalisées** : `FileNotFoundError` et `ParseError`
+- **Wrapping d'erreurs** : Utilisation de `fmt.Errorf` avec `%w`
+- **Inspection d'erreurs** : `errors.Is()` et `errors.As()`
+
+### CLI avec Cobra
+- **Commandes structurées** : Commande racine et sous-commandes
+- **Drapeaux** : Options courtes et longues
+- **Validation** : Drapeaux requis et validation des entrées
+
+## 🧪 Tests et exemples
+
+Le projet inclut des fichiers de test dans le répertoire `test_logs/` :
+
+- `access.log` : Log d'accès web
+- `errors.log` : Log d'erreurs d'application
+- `mysql_error.log` : Log d'erreurs MySQL
+- `empty.log` : Fichier vide
+- `corrupted.log` : Fichier avec données corrompues
+
+### Exécution des tests
+
+```bash
+# Test avec la configuration par défaut
+./loganalyzer analyze -c config.json
+
+# Test avec export JSON
+./loganalyzer analyze -c config.json -o test_report.json
+```
+
+## 🎯 Fonctionnalités avancées
+
+### Simulation d'erreurs
+- **Erreurs aléatoires** : 10% de chance d'erreur de parsing
+- **Délais variables** : Simulation réaliste avec délais de 50-200ms
+- **Gestion des fichiers manquants** : Détection et rapport des fichiers inaccessibles
+
+### Création automatique de répertoires
+Si le chemin de sortie inclut des répertoires inexistants, ils sont créés automatiquement.
+
+```bash
+# Crée automatiquement le répertoire "rapports/2024/"
+./loganalyzer analyze -c config.json -o rapports/2024/mon_rapport.json
+```
+
+## 👥 Équipe de développement
+
+- **Soufiane** - Développeur principal
+- **Axelle Lanca** - Contributeur original du repository
+
+## 📝 Licence
+
+Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! Pour contribuer :
+
+1. Forkez le projet
+2. Créez une branche pour votre fonctionnalité (`git checkout -b feature/AmazingFeature`)
+3. Committez vos changements (`git commit -m 'Add some AmazingFeature'`)
+4. Poussez vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrez une Pull Request
+
+## 📞 Support
+
+Pour toute question ou problème, veuillez ouvrir une issue sur GitHub.
 
 ---
 
-### Cahier des charges
-
-Votre outil `loganalyzer` devra implémenter les fonctionnalités suivantes :
-
-#### 1. Commande `analyze`
-
-- **Entrée JSON :** La commande prendra un chemin vers un **fichier de configuration JSON** via un drapeau `--config <path>` (raccourci `-c`). Ce fichier contiendra la liste des logs à analyser.
-
-  **Exemple de fichier `config.json` :**
-    ```json
-    [
-      {
-        "id": "web-server-1",
-        "path": "/var/log/nginx/access.log",
-        "type": "nginx-access"
-      },
-      {
-        "id": "app-backend-2",
-        "path": "/var/log/my_app/errors.log",
-        "type": "custom-app"
-      }
-    ]
-    ```
-  - `id` : Un identifiant unique pour le log.
-  - `path` : Le chemin (absolu ou relatif) vers le fichier de log.
-  - `type` : Le type de log (peut être ignoré mais doit être présent).
-
-- **Traitement concurrentiel :** Une **goroutine** sera lancée pour chaque log :
-  - Vérifier si le fichier existe et est lisible.
-  - Simuler l'analyse avec un `time.Sleep` aléatoire (50 à 200 ms).
-  - **Erreur aléatoire simulée :** 10% de chance de générer une erreur de parsing.
-
-- **Collecte et Exportation des résultats :**
-  - Résultats collectés via un **canal sécurisé**.
-  - Export possible via `--output <path>` (raccourci `-o`) dans un fichier JSON.
-
-    **Exemple de fichier `report.json` :**
-    ```json
-    [
-      {
-        "log_id": "web-server-1",
-        "file_path": "/var/log/nginx/access.log",
-        "status": "OK",
-        "message": "Analyse terminée avec succès.",
-        "error_details": ""
-      },
-      {
-        "log_id": "invalid-path",
-        "file_path": "/non/existent/log.log",
-        "status": "FAILED",
-        "message": "Fichier introuvable.",
-        "error_details": "open /non/existent/log.log: no such file or directory"
-      }
-    ]
-    ```
-
-- **Affichage sur console :** Un résumé doit être affiché pour chaque log : ID, chemin, statut, message, erreur (si applicable).
-
-#### 2. Gestion des Erreurs Personnalisées
-
-- Implémenter au moins **deux types d'erreurs personnalisées** :
-  - Fichier introuvable/inaccessible.
-  - Erreur de parsing.
-- Utiliser `errors.Is()` et `errors.As()` pour les gérer proprement.
-
----
-
-### Architecture suggérée (packages `internal/`)
-
-Organisez le projet comme suit :
-
-- `internal/config` : Lecture des configurations JSON.
-- `internal/analyzer` : Analyse, erreurs personnalisées, rapport.
-- `internal/reporter` : Export JSON des résultats.
-- `cmd/` :
-  - `root.go` : Commande racine.
-  - `analyze.go` : Commande `analyze`.
-
----
-
-### Critères d'évaluation
-
-L’évaluation portera sur :
-
-- **Fonctionnalité :** La commande `analyze` fonctionne-t-elle comme spécifié ?
-- **Concurrence :** Traitement en parallèle via `goroutines` et `WaitGroup` ? Résultats collectés via `channel` ?
-- **Gestion des Erreurs :** Utilisation et gestion correcte des erreurs personnalisées ? Messages d’erreur clairs ?
-- **CLI :** Interface Cobra fonctionnelle, avec drapeaux et descriptions ?
-- **JSON :** Import/export respectant les structures attendues ?
-- **Modularité :** Code organisé proprement en packages ?
-- **Documentation :** Je veux voir **un beau readme** qui explique le fonctionnement de votre programme, vos commandes, et j'en passe ET **la documentation de votre code** et **les membres de votre team**.
-
-### Type de rendu
-
-- Un lien github
-
-
-### 🎁 BONUS
-
-Vous avez l'âme d'un.e développeur.euse courageux.euse ? Je vous laisse ici quelques bonus si vous voulez vous amuser un peu et avoir un programme plus complet.
-
-**1. Gestion des dossiers d'exportation **
-* Si le chemin de sortie JSON (`--output`) inclut des répertoires qui n'existent pas (ex: `rapports/2024/mon_rapport.json`), faire en sorte que le programme crée automatiquement ces répertoires avant d'écrire le fichier.
-* **Indice** : `os.MkdirAll(filepath.Dir(path), 0755)`
-* **Intérêt** : Rend l'outil plus robuste et convivial.
-
-**2. Horodatage des Exports JSON**
-* Nommer les fichiers de sortie JSON avec une date :
-  * **Modifier la commande `analyze`** pour que, si le drapeau `--output` est fourni, le nom du fichier de sortie JSON inclue la date du jour au format AAMMJJ (AnnéeMoisJour).
-  * **Exemple** : au lieu de `report.json`, le fichier serait nommé `240524_report.json` (pour le 24 mai 2024).
-  * **Indice** : Utiliser le package `time` de Go (`time.Now()`, `time.Format()`).
-  * **Intérêt** : Ajoute une fonctionnalité pratique pour l'organisation des rapports, et force à manipuler les dates en Go.
-
-**2. Commande `add-log`**
-* **Ajouter une nouvelle sous-commande add-log** qui permettrait d'ajouter manuellement une configuration de log au fichier config.json existant.
-* **Drapeaux nécessaires** : `--id`, `--path`, `--type`, `--file` (chemin du fichier `config.json`).
-
-**3. Filtrage des résultats d'analyse**
-* **Ajouter un drapeau `--status <status>`** (ex: `--status FAILED` ou `--status OK`) à la commande analyze pour n'afficher et/ou n'exporter que les logs ayant un certain statut.
-* **Intérêt** : Ajoute une fonctionnalité utile et demande de la logique de filtrage avant l'affichage/l'export.
-
-
----
-
-### Pour démarrer (Prérequis)
-
-1. Créer un module : `go mod init`
-2. Installer Cobra : `go get github.com/spf13/cobra@latest`
-3. Avoir bien lu le readme ;)
-
----
-
-Bon courage !
+**LogAnalyzer** - Analyse de logs distribuée avec Go 🚀
